@@ -1,0 +1,13 @@
+# The image from which our own image will be built on
+FROM debian:stretch
+
+# Shell commands to execute
+RUN apt-get update && \
+    apt-get install -y cowsay
+
+# Specify environment variable
+# ENV env_var env_value can be translated as : export env_var=env_value
+ENV PATH $PATH:/usr/games
+
+# Command to be executed a container launch
+CMD ["cowsay", "I am a configured cow"]
