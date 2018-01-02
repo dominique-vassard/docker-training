@@ -180,7 +180,7 @@ Image is tag with the "latest" tag. "latest" is the default tag.
 ##### 5.3. Publish on Gitlab
 ###### Connect to gitlab registry
 Gitlab makes it clear:  
-![Connect & use gitlab registry](https://git.kwankodev.net/dominique.vassard/docker-training/raw/training/cutest-image-ever/images/gitlab_registry.png "Gitlab registry")  
+![Connect & use gitlab registry](https://git.kwankodev.net/dominique.vassard/docker-training/raw/part-1-cutest-image-ever/cutest-image-ever/images/gitlab_registry.png "Gitlab registry")  
 Gitlab will aske for your username / password.  
 ###### Give the image a proper name
 As gitlab advised, your image needs to have a proper name.  
