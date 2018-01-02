@@ -1,4 +1,4 @@
-# Part 2: A clairvoyant application
+# Part 2: A claivoyant application
 
 ## Goal
 We're going to build a very simple application that telles the future given an astrological sign.  
@@ -47,3 +47,6 @@ And run it:
 Container runs as long their CMD lasts. Then for a webserver, or any other background task, container will ruyn until we stop it or the process crashes.  
 If we ran the container without `-d`, we'll have access to command line inside the container, but as soon as we leave it, the container dies. 
 
+
+Now, if we list running containers, we can it:  
+`docker ps`
