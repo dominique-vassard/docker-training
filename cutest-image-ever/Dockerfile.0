@@ -1,0 +1,9 @@
+# The image from which our own image will be built on
+FROM debian:stretch
+
+# Shell commands to execute
+RUN apt-get update && \
+    apt-get install -y cowsay
+
+# Command to be executed a container launch
+CMD ["/usr/games/cowsay", "What is the image?"]
