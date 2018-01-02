@@ -103,3 +103,50 @@ docker exec -ti irma-api python tests/test_irma_integration.py
 ```
 
 You can now test our mighty api: 127.0.0.1:5000
+
+## v2: What about changing python version?
+That's easy as just changing the version in the Docker file! 
+  
+Build:  
+`docker build -t clairvoyant-app:v2-python3 .`  
+And launch a new container:  
+```
+docker run -d \
+-p5000:5000 \
+--name irma-api \
+--mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+clairvoyant-app:v2-python3
+```
+
+Test just to be sure:  
+```
+docker exec -ti irma-api python tests/test_irma_unit.py
+docker exec -ti irma-api python tests/test_irma_integration.py
+```
+... and that's fail.  
+
+Nevermind, just update the code, and now all is OK.  
+
+Now, se have our application available both in python 2 and in python 3.  
+And what's beyond marvelous, is that we can run both of same at the same time!  
+Let's re-launch th python 2 but with a different port mapping.
+```
+docker run -d \
+-p5005:5000 \
+--name irma-api-p2 \
+--mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+clairvoyant-app:v1-1-web-api-mount
+```
+
+Got to your browser and open: `http://127.0.0.1:5005/irma/aries`  
+It works!  
+Now we know that our code is compatible with python 2 AND python 3.  
+With our containers sharing the same code, we can code with confidence and be aware of any incompatibility that might happened.  
+For example:  
+We decide to type our code, then we replace:
+`def read_future(sign):`  
+with  
+`def read_future(sign:str):`  
+This crash on python2 but not on python3, and wwe can see it.  
+  
+Let's pursue with a fully-typed python3 code. 

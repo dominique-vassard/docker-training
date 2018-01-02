@@ -6,7 +6,7 @@ import argparse
 ROOT = os.path.dirname(__file__) + "/"
 
 
-def check_sign(sign):
+def check_sign(sign:str):
     """Check if given astrological sign is valid.
     Sanitizes the result.
 
@@ -41,7 +41,7 @@ def check_sign(sign):
         raise Exception("This sign does not exists")
 
 
-def read_future(sign):
+def read_future(sign:str):
     """Read future form external source.
 
 
@@ -52,16 +52,16 @@ def read_future(sign):
         (str): The future for the given astrological sign
     """
     res = "no future"
-    with open(ROOT + "data/future.csv", "rb") as f:
+    with open(ROOT + "data/future.csv", "r") as f:
         reader = csv.DictReader(f)
-        future = filter(lambda x: x["sign"] == sign, reader)
+        future = list(filter(lambda x: x["sign"] == sign, reader))
         if future:
             res = future[0]["future"]
 
     return res
 
 
-def see_future(sign):
+def see_future(sign:str):
     """Clairvoyant function.
 
     Give me your sign, I'll tell your future.

@@ -1,5 +1,5 @@
 # Base image for our application
-FROM python:2
+FROM python:3
 
 # Create application directory
 RUN mkdir -p /home/clairvoyant-app
