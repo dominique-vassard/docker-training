@@ -75,13 +75,5 @@ def see_future(sign):
     {}
     """
 
-    print(res.format(cur_sign.capitalize(),
-                     read_future(cur_sign).capitalize()))
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="I can see your future.")
-    parser.add_argument("sign", type=str, help="Your astrological sign.")
-    args = parser.parse_args()
-
-    see_future(args.sign)
+    return res.format(cur_sign.capitalize(),
+                      read_future(cur_sign).capitalize())
