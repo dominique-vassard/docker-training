@@ -18,7 +18,7 @@ RUN pip install -r requirements.txt
 COPY . /home/clairvoyant-app
 
 # Set PYTHONPATH for test to work / Flask app
-ENV PYTHONPATH=/home/clairvoyant-app FLASK_APP=/home/clairvoyant-app/app/irma_api.py
+ENV PYTHONPATH=/home/clairvoyant-app FLASK_APP=/home/clairvoyant-app/app/irma_api.py FLASK_DEBUG=1
 
 # Expose app port
 EXPOSE 5000

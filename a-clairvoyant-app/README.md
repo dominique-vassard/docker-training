@@ -1,4 +1,4 @@
-# Part 2: A clairvoyant application
+# Part 2: A claivoyant application
 
 ## Goal
 We're going to build a very simple application that telles the future given an astrological sign.  
@@ -47,3 +47,29 @@ And run it:
 Container runs as long their CMD lasts. Then for a webserver, or any other background task, container will ruyn until we stop it or the process crashes.  
 If we ran the container without `-d`, we'll have access to command line inside the container, but as soon as we leave it, the container dies. 
 
+
+Now, if we list running containers, we can it:  
+`docker ps`
+
+
+### v1.1: A better access to code  
+We have a workinf server, but now we need to stitch all parts together in order to our application to work. 
+It can be very time-consuming to have to build our image each time we change the code....
+There is a solution for this problem: we can mount our application directory on a container directory, therefore our code changes will be automatically replicated insiode the container.
+
+First, stop our previous container:  
+`docker stop irma-api`  
+And delete it, because two containers cannot share the same name:  
+`docker rm irma-api`  
+
+Now we can create a container with a volume:  
+```
+docker run -d \
+-p5000:5000 \
+--name irma-api \
+--mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+clairvoyant-app:v1-web-api-server
+```
+
+How nice is this with the automatic reload of flsk debug?  
+ 
