@@ -149,4 +149,8 @@ with
 `def read_future(sign:str):`  
 This crash on python2 but not on python3, and wwe can see it.  
   
+By the way, logs are accessible via `docker logs container_name`.  
+`--tail number` allows you to see the last `number` lines of logs.  
+`-f`, for `--follow` allows you to follow the logs, as `tail -f` should.
+
 Let's pursue with a fully-typed python3 code. 
