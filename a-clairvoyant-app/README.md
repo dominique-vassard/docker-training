@@ -150,3 +150,207 @@ with
 This crash on python2 but not on python3, and wwe can see it.  
   
 Let's pursue with a fully-typed python3 code. 
+
+## v3: Add a real database
+Our data is stored in a CSV file, which is quit handy but does not scale very well. In addition, data changes wil laffect the repository, which is not recommended. 
+So, let's use Mysql!
+
+### Getting mysql to work
+First, pull the image:  
+`docker pull mysql:5.7`  
+Launch a container with a root_password:  
+```
+docker run -d --name container_name \
+-e MYSQL_ROOT_PASSWORD=mysql_root_pass \
+mysql:5.5
+```
+
+In order to make mysql accesible from anywhere add options `--bind-address=0.0.0.0`
+
+In addition, it is possible to create database and user at container creation with the environment variable:
+- `MYSQL_DATABASE=database_name`: to create a database 
+- `MYSQL_USER=user_name`: to create a user (non root)
+- `MYSQL_USER`: to create non root user's password
+
+Full example:  
+```
+docker run -d --name irma-mysql \
+-e MYSQL_ROOT_PASSWORD=mysql \
+-e MYSQL_DATABASE=irma \
+-e MYSQL_USER=irma \
+-e MYSQL_PASSWORD=cr1StalB4ll \
+-p 3306:3306 \
+mysql:5.7 \
+--bind-address=0.0.0.0
+```
+
+`-e` stands for `--env`, it allows to set environment variable.  
+If you already have a `mysql` process running on your machine, you will encoutered the following error:  
+`address already in use.`  
+This means the port you try to use is not available.  
+Then, just change it, it's easy!  
+```
+docker run -d --name irma-mysql \
+-e MYSQL_ROOT_PASSWORD=mysql \
+-e MYSQL_DATABASE=irma \
+-e MYSQL_USER=irma \
+-e MYSQL_PASSWORD=cr1StalB4ll \
+-p 3366:3306 \
+mysql:5.7 \
+--bind-address=0.0.0.0
+```
+Now, mysql is on port 3366.  
+  
+
+You cann access your mysql with this (somehow barbaric) command:  
+```
+docker run -ti \
+--link irma-mysql:mysql --rm \
+mysql:5.5 sh -c 'exec mysql \
+-h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
+-uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
+```
+
+To connect to mysql, we need mysql. Sounds like a circular dependency doomed to failure as we don't have mysql on our machine.  
+To avoisd this problem, we will create a container from mysql image, link (more on this later) it to our working mysql and execute a command inside that last container.   
+  
+We can see that our database is here:  
+`SHOW DATABASES;`  
+And our user too:  
+`SELECT User, Host, authentication_string FROM mysql.user;`
+
+Now let's get our hands on code!  
+
+## Use mysql from code
+To connect to our database, we need its name/IP.  
+So why not use the container IP?  
+It can be found at the infos given by `docker inspect irma-mysql`.  
+
+First, update the codebase in order to use database instead of CSV file.  
+And build a new image as we have new dependencies.  
+`docker build -t clairvoyant-app:v3-mysql .`  
+  
+Destrou current api container:  
+`docker rm -f irma-api`  
+And launch a new one:
+```
+docker run -d \
+-p5000:5000 \
+--name irma-api \
+--mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+clairvoyant-app:v3-mysql
+```
+  
+
+
+Then launch database initialization:  
+`docker exec -ti irma-api flask initdb`  
+Tests:  
+```
+docker exec -ti irma-api python tests/test_irma_unit.py
+docker exec -ti irma-api python tests/test_irma_integration.py
+```
+  
+And finally, test in browser:  
+`http://127.0.0.1:5000/irma/aries`  
+It works!
+
+But there is 2 problems:
+- when a container is launched, we can't know for sure what will be its IP
+- our db container is just a mysql without data. When relaunching, it will be a fresh database without data!
+
+## The right way to connect containers
+Two containers can communicate with each other only if they are on the same network.  
+
+First let's see what are the currently available network:  
+`docker network ls`  
+You should see at least one network (the default one): bridge  
+Let's see what are the containers it holds:  
+`docker network inspect bridge`  
+You should see your containers in the `Containers` part of the json.  
+  
+So, these containers are on the same network then they should be able to communicate with each others. Let's see!  
+Connect into irma-api:  
+`docker exec -ti irma-api bash`  
+Try to ping irma-mysql via its IP:  
+`ping -w2 172.17.0.3`  
+It works. Great!  
+Try to ping it with its name now:  
+`ping -w2 irma-mysql`  
+It doesn't work. Why?  
+  
+Ansmwer is simple: communication via container's name works only on the created network and not on the default one....  
+
+So let's crat a network and connect our containers to it.  
+First create a network:  
+`docker network create --subnet 172.25.0.0/16 irmanet`  
+`--subnet` allows to force our containers IPs  
+  
+
+Inspect our newly created network:  
+`docker network inspect irmanet`  
+We can see that no containers are on this network.  
+Let's add ours:  
+`docker network connect irmanet irma-api`  
+`docker network connect irmanet irma-mysql`  
+  
+Inspect again out network:  
+`docker network inspect irmanet`  
+Both our containers are present.  
+  
+Now, let's connect into irma-api:  
+`docker exec -ti irma-api bash`  
+and try to ping irma-mysql by its IP:  
+`ping -w2 172.17.0.3`
+and by its name:  
+`ping -w2 irma-mysql`  
+It works!  
+  
+We can now replace our hard-coded IP:
+`app.config["DB_HOST"] = "172.17.0.3"`  
+by the container name:  
+`app.config["DB_HOST"] = "irma-mysql"`
+
+Let's run our tests to make sure that everything works fine:  
+```
+docker exec -ti irma-api python tests/test_irma_unit.py
+docker exec -ti irma-api python tests/test_irma_integration.py
+```
+
+While it is possible to connect containers after their creations, it is better to connect them to a network at creation. Let's do it.  
+First, desctroy them all:  
+`docker rm -f irma-api irma-mysql`  
+
+Then re-create api:
+```
+docker run -d \
+-p5000:5000 \
+--name irma-api \
+--network irmanet \
+--mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+clairvoyant-app:v3-mysql
+```
+ 
+And the mysql database:  
+```
+docker run -d --name irma-mysql \
+--network irmanet \
+-e MYSQL_ROOT_PASSWORD=mysql \
+-e MYSQL_DATABASE=irma \
+-e MYSQL_USER=irma \
+-e MYSQL_PASSWORD=cr1StalB4ll \
+-p 3366:3306 \
+mysql:5.7 \
+--bind-address=0.0.0.0
+```
+  
+We can inspect `irmanet` network to ensure that our containers are there:  
+`docker network inspect irmanet`  
+Everythinh seems fine.  
+Let's launch our tests:  
+`docker exec -ti irma-api python tests/test_irma_unit.py`  
+Wow, every single test fails!  
+What happened?  
+  
+It happens that when a container is created, it is following its image, and the mysql image doesn't include any data. Let's tackel this problem.  
+

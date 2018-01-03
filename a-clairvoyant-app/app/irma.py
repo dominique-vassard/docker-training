@@ -1,9 +1,4 @@
-import os
-import csv
-import argparse
-
-
-ROOT = os.path.dirname(__file__) + "/"
+import app.db_operations as db_ops
 
 
 def check_sign(sign:str):
@@ -41,27 +36,7 @@ def check_sign(sign:str):
         raise Exception("This sign does not exists")
 
 
-def read_future(sign:str):
-    """Read future form external source.
-
-
-    Arguments:
-        sign (str): Astrological sign for which predict future.
-
-    Returns:
-        (str): The future for the given astrological sign
-    """
-    res = "no future"
-    with open(ROOT + "data/future.csv", "r") as f:
-        reader = csv.DictReader(f)
-        future = list(filter(lambda x: x["sign"] == sign, reader))
-        if future:
-            res = future[0]["future"]
-
-    return res
-
-
-def see_future(sign:str):
+def see_future(sign:str, db):
     """Clairvoyant function.
 
     Give me your sign, I'll tell your future.
@@ -76,4 +51,4 @@ def see_future(sign:str):
     """
 
     return res.format(cur_sign.capitalize(),
-                      read_future(cur_sign).capitalize())
+                      db_ops.read_future(cur_sign, db).capitalize())
