@@ -354,3 +354,55 @@ What happened?
   
 It happens that when a container is created, it is following its image, and the mysql image doesn't include any data. Let's tackel this problem.  
 
+## The data problem
+Solve this problem is pretty simple as we've done something similar before.  
+A while ago, we wanted to be able to update our code without rebuilding a new image and we mount a volume on the api container. You can view this from another point and say that we persists our changes, no matter iof there is an api container or not. The same applies for database, and solution is the same: we create a volume to store our data.  
+  
+First create a directory to store our data on our machine:  
+`mkdir data`  
+Destroy current mysql container:  
+`docker rm -f irma-mysql`  
+And re-create it with a volume:  
+```
+docker run -d --name irma-mysql \
+--network irmanet \
+--mount type=bind,source=$(pwd)/data,target=/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=mysql \
+-e MYSQL_DATABASE=irma \
+-e MYSQL_USER=irma \
+-e MYSQL_PASSWORD=cr1StalB4ll \
+-p 3366:3306 \
+mysql:5.7 \
+--bind-address=0.0.0.0
+```
+There can be a delay before database is really up.  
+  
+Populate our database:  
+`docker exec -ti irma-api flask initdb`  
+Launch the tests:  
+```
+docker exec -ti irma-api python tests/test_irma_unit.py
+docker exec -ti irma-api python tests/test_irma_integration.py
+```
+All is fine.
+
+
+Now is the fun part. Destroy your container:  
+`docker rm -f irma-mysql`  
+
+And re-create it
+Be aware that now your database and password are already created, then to create a new container, all is required is this:
+```
+docker run -d --name irma-mysql \
+--network irmanet \
+--mount type=bind,source=$(pwd)/data,target=/var/lib/mysql \
+-p 3366:3306 \
+mysql:5.7
+```
+  
+Launch to ensure that everything's fine:  
+```
+docker exec -ti irma-api python tests/test_irma_unit.py
+docker exec -ti irma-api python tests/test_irma_integration.py
+```
+Nice, isn't it?
