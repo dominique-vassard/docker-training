@@ -1,0 +1,5 @@
+# Ignore python cache
+a-clairvoyant-app/app/__pycache__
+
+# Ignore mysql data
+data
