@@ -19,7 +19,7 @@ Application will just provides a prediction foir a given astrological sign.
 
 ## 5. The data problem
 
-## 6. Complete application in one command?
+## 6. One application, one command
 Wouldn't be nice to have our application up with just one command?  
 Well, that the purpose of Docker compose.  
 To install it, [follow the instructions](https://docs.docker.com/compose/install/)  
