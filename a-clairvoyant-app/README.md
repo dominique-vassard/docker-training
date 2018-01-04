@@ -237,7 +237,7 @@ And launch a new one:
 docker run -d \
 -p5000:5000 \
 --name irma-api \
---mount type=bind,source=$(pwd),target=/home/clairvoyant-app \
+--mount type=bind,source=$(pwd),target=c \
 clairvoyant-app:v3-mysql
 ```
   
@@ -406,3 +406,39 @@ docker exec -ti irma-api python tests/test_irma_unit.py
 docker exec -ti irma-api python tests/test_irma_integration.py
 ```
 Nice, isn't it?
+
+## Complete applications in one build?
+Wouldn't be nice to have our application up with just one command?  
+Well, that the purpose of Docker compose.  
+To install it, [follow the instructions](https://docs.docker.com/compose/install/)  
+Additionally, install the (very useful) bash completions: [instructions here](https://docs.docker.com/compose/completion/)  
+
+First, let's create our `docker-compose.yml`.  
+Now that you understand how containers work, reading it should be very easy.  
+
+Let's up our project:  
+`docker-compose up -d`  
+You can view what's been upped with:  
+`docker-compose ps`  
+  
+
+We can run command inside docker-compose containers like this:
+`docker-compose run irma-api flask initdb`  
+(We don't need it as we mount a data volume)  
+
+Let's test:  
+```
+docker-compose run irma-api python tests/test_irma_unit.py
+docker-compose run irma-api python tests/test_irma_integration.py
+```
+
+In fact, there is nothing new as classic containers have been created, see:  
+`docker ps`  
+Then you can interact as before with your containers.  
+  
+What about network?  
+Let's list them:  
+`docker network ls`  
+As we can see, docker-compose created its own network and put all containers he has created in it.  
+Just as we did by hand.  
+

@@ -1,0 +1,25 @@
+version: '3'
+
+# Define required service
+# A service is "brick" in your infrastructure
+services:
+  # Defining database
+  irma-mysql:
+    image: "mysql:5.7"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_DATABASE=irma
+      - MYSQL_USER=irma
+      - MYSQL_PASSWORD=cr1StalB4ll
+    volumes:
+      - ../data:/var/lib/mysql
+
+  # Defining API
+  irma-api:
+    build: .
+    depends_on:
+      - irma-mysql
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/home/clairvoyant-app
