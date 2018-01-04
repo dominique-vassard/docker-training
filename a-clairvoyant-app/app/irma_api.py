@@ -9,7 +9,7 @@ import app.db_operations as db_ops
 app = Flask(__name__)
 
 # CONFIG
-app.config["DB_HOST"] = "irma-mysql"
+app.config["DB_HOST"] = "172.17.0.3"
 app.config["DB_PORT"] = 3306
 app.config["DB_USER"] = "irma"
 app.config["DB_PASSWORD"] = "cr1StalB4ll"
