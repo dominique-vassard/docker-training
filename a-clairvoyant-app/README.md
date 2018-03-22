@@ -1,8 +1,8 @@
 # Part 2: A clairvoyant application
 
 ## 0. Goal
-We're going to build a very simple application that telles the future given an astrological sign.  
-Application will just provides a prediction foir a given astrological sign.
+We're going to build a very simple application that tells the future given an astrological sign.  
+Application will just provides a prediction for a given astrological sign.
 
 ## 1. First version
 
@@ -23,7 +23,7 @@ Launch a container with a root_password:
 ```
 docker run -d --name container_name \
 -e MYSQL_ROOT_PASSWORD=mysql_root_pass \
-mysql:5.5
+mysql:5.7
 ```
 
 In order to make mysql accesible from anywhere add options `--bind-address=0.0.0.0`
@@ -65,15 +65,15 @@ Now, mysql is on port 3366.
 
 You cann access your mysql with this (somehow barbaric) command:  
 ```
-docker run -ti \
---link irma-mysql:mysql --rm \
-mysql:5.5 sh -c 'exec mysql \
+docker run --rm -it \ 
+--link irma-mysql:mysql \
+mysql:5.7 sh -c 'exec mysql \
 -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" \
 -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD"'
 ```
 
 To connect to mysql, we need mysql. Sounds like a circular dependency doomed to failure as we don't have mysql on our machine.  
-To avoisd this problem, we will create a container from mysql image, link (more on this later) it to our working mysql and execute a command inside that last container.   
+To avoid this problem, we will create a container from mysql image, link (more on this later) it to our working mysql and execute a command inside that last container.   
   
 We can see that our database is here:  
 `SHOW DATABASES;`  
