@@ -1,8 +1,8 @@
 # Part 2: A clairvoyant application
 
 ## 0. Goal
-We're going to build a very simple application that telles the future given an astrological sign.  
-Application will just provides a prediction foir a given astrological sign.
+We're going to build a very simple application that tells the future given an astrological sign.  
+Application will just provides a prediction for a given astrological sign.
 
 ## 1. First version
 
