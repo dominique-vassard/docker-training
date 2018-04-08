@@ -206,17 +206,4 @@ Image is tag with the "latest" tag. "latest" is the default tag.
 **"latest" is not version. DO NOT use images with this tag, you don't know what's in them!**
   
 
-##### 5.3. Publish on Gitlab
-###### Connect to gitlab registry
-Gitlab makes it clear:  
-![Connect & use gitlab registry](https://git.kwankodev.net/dominique.vassard/docker-training/raw/part-1-cutest-image-ever/cutest-image-ever/images/gitlab_registry.png "Gitlab registry")  
-Gitlab will aske for your username / password.  
-###### Give the image a proper name
-As gitlab advised, your image needs to have a proper name.  
-Let's create ours:  
-`docker tag cutest-image-ever:v3 registry.kwankodev.net/dominique.vassard/docker-training/cutest-image-ever:v3.0`  
-And push it:  
-`docker push registry.kwankodev.net/dominique.vassard/docker-training/cutest-image-ever:v3.0`  
-  
-  
 And that's all, everyone can now `docker pull` the image and have a cute application.
